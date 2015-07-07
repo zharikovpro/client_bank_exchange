@@ -1,5 +1,7 @@
 require 'date'
 require 'time'
+require 'bigdecimal'
+require 'bigdecimal/util'
 
 module ClientBankExchange
   class << self
@@ -39,10 +41,10 @@ module ClientBankExchange
           # normalize
           hash_value_to_date result[:remainings], :ДатаНачала
           hash_value_to_date result[:remainings], :ДатаКонца
-          hash_value_to_f result[:remainings], :НачальныйОстаток
-          hash_value_to_f result[:remainings], :ВсегоПоступило
-          hash_value_to_f result[:remainings], :ВсегоСписано
-          hash_value_to_f result[:remainings], :КонечныйОстаток
+          hash_value_to_d result[:remainings], :НачальныйОстаток
+          hash_value_to_d result[:remainings], :ВсегоПоступило
+          hash_value_to_d result[:remainings], :ВсегоСписано
+          hash_value_to_d result[:remainings], :КонечныйОстаток
         end
   
         # parse documents
@@ -57,7 +59,7 @@ module ClientBankExchange
           # normalize
           hash_value_to_i document, :Номер
           hash_value_to_date document, :Дата
-          hash_value_to_f document, :Сумма
+          hash_value_to_d document, :Сумма
   
           document
         end
@@ -82,8 +84,8 @@ module ClientBankExchange
       hash[key] = hash[key].to_i if hash[key]
     end
   
-    def hash_value_to_f hash, key
-      hash[key] = hash[key].to_f if hash[key]
+    def hash_value_to_d hash, key
+      hash[key] = hash[key].to_d if hash[key]
     end
   end
 end

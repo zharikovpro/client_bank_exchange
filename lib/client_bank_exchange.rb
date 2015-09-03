@@ -6,7 +6,7 @@ require 'bigdecimal/util'
 module ClientBankExchange
   class << self
     def parse_file path
-      parse File.read(path)
+      parse File.read(path, encoding: 'windows-1251:utf-8')
     end
   
     def parse content

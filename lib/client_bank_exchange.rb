@@ -26,7 +26,7 @@ module ClientBankExchange
           :ДатаСоздания, :ВремяСоздания
         ].each do |key|
           /#{key}=(.*)/.match(content) do |match|
-            result[:general][key] = match[1]
+            result[:general][key] = match[1].strip
           end
         end
   
@@ -36,7 +36,7 @@ module ClientBankExchange
         # parse remainings
         /СекцияРасчСчет([\s\S]*?)\sКонецРасчСчет/.match(content) do |match|
           # remainings properties (key=value)
-          match[1].scan(/(.*)=(.*)/) { |k, v| result[:remainings][k.to_sym] = v }
+          match[1].scan(/(.*)=(.*)/) { |k, v| result[:remainings][k.to_sym] = v.strip }
   
           # normalize
           hash_value_to_date result[:remainings], :ДатаНачала
@@ -54,7 +54,7 @@ module ClientBankExchange
           document = { СекцияДокумент: doc[0] }
   
           # document properties (key=value)
-          doc[1].scan(/(.*)=(.*)/) { |k, v| document[k.to_sym] = v }
+          doc[1].scan(/(.*)=(.*)/) { |k, v| document[k.to_sym] = v.strip }
   
           # normalize
           hash_value_to_i document, :Номер

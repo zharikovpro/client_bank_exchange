@@ -52,9 +52,11 @@ describe ClientBankExchange do
     result[:documents][0][:Номер].must_equal 1
     result[:documents][0][:Дата].must_equal Date.parse('2015-01-01')
     result[:documents][0][:Сумма].must_equal 1000.00
+    result[:documents][0][:ПлательщикИНН].must_equal '000000000001'
 
     result[:documents][1][:Номер].must_equal 2
     result[:documents][1][:Дата].must_equal Date.parse('2015-02-02')
     result[:documents][1][:Сумма].must_equal 2000.0
+    result[:documents][1][:ПлательщикИНН].must_equal '000000000002'
   end
 end

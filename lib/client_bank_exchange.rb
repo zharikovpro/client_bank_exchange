@@ -19,50 +19,11 @@ module ClientBankExchange
       }
   
       if content.start_with? '1CClientBankExchange'
-        # parse general info (key=value)
-        [
-          :ВерсияФормата, :Кодировка,
-          :Отправитель, :Получатель,
-          :ДатаСоздания, :ВремяСоздания
-        ].each do |key|
-          /#{key}=(.*)/.match(content) do |match|
-            result[:general][key] = match[1].strip
-          end
-        end
+        result[:general] = general(content)
   
-        hash_value_to_date result[:general], :ДатаСоздания
-        hash_value_to_time result[:general], :ВремяСоздания
+        result[:remainings] = remainings(content)
   
-        # parse remainings
-        /СекцияРасчСчет([\s\S]*?)\sКонецРасчСчет/.match(content) do |match|
-          # remainings properties (key=value)
-          match[1].scan(/(.*)=(.*)/) { |k, v| result[:remainings][k.to_sym] = v.strip }
-  
-          # normalize
-          hash_value_to_date result[:remainings], :ДатаНачала
-          hash_value_to_date result[:remainings], :ДатаКонца
-          hash_value_to_d result[:remainings], :НачальныйОстаток
-          hash_value_to_d result[:remainings], :ВсегоПоступило
-          hash_value_to_d result[:remainings], :ВсегоСписано
-          hash_value_to_d result[:remainings], :КонечныйОстаток
-        end
-  
-        # parse documents
-        regexp_document = /СекцияДокумент=(.*)\s([\s\S]*?)\sКонецДокумента/
-        result[:documents] = content.scan(regexp_document).map do |doc|
-          # document type
-          document = { СекцияДокумент: doc[0] }
-  
-          # document properties (key=value)
-          doc[1].scan(/(.*)=(.*)/) { |k, v| document[k.to_sym] = v.strip }
-  
-          # normalize
-          hash_value_to_i document, :Номер
-          hash_value_to_date document, :Дата
-          hash_value_to_d document, :Сумма
-  
-          document
-        end
+        result[:documents] = documents(content)
       else
         result[:errors] << 'Wrong format: 1CClientBankExchange not found'
       end
@@ -71,6 +32,63 @@ module ClientBankExchange
     end
   
     private
+
+    def general content
+      result = {}
+
+      # parse general info (key=value)
+      [
+        :ВерсияФормата, :Кодировка,
+        :Отправитель, :Получатель,
+        :ДатаСоздания, :ВремяСоздания
+      ].each do |key|
+        /#{key}=(.*)/.match(content) do |match|
+          result[key] = match[1].strip
+        end
+      end
+
+      hash_value_to_date result, :ДатаСоздания
+      hash_value_to_time result, :ВремяСоздания
+
+      result
+    end
+
+    def remainings content
+      result = {}
+
+      /СекцияРасчСчет([\s\S]*?)\sКонецРасчСчет/.match(content) do |match|
+        # remainings properties (key=value)
+        match[1].scan(/(.*)=(.*)/) { |k, v| result[k.to_sym] = v.strip }
+
+        # normalize
+        hash_value_to_date result, :ДатаНачала
+        hash_value_to_date result, :ДатаКонца
+        hash_value_to_d result, :НачальныйОстаток
+        hash_value_to_d result, :ВсегоПоступило
+        hash_value_to_d result, :ВсегоСписано
+        hash_value_to_d result, :КонечныйОстаток
+      end
+
+      result
+    end
+
+    def documents content
+      regexp_document = /СекцияДокумент=(.*)\s([\s\S]*?)\sКонецДокумента/
+      content.scan(regexp_document).map do |doc|
+        # document type
+        document = { СекцияДокумент: doc[0] }
+
+        # document properties (key=value)
+        doc[1].scan(/(.*)=(.*)/) { |k, v| document[k.to_sym] = v.strip }
+
+        # normalize
+        hash_value_to_i document, :Номер
+        hash_value_to_date document, :Дата
+        hash_value_to_d document, :Сумма
+
+        document
+      end
+    end  
   
     def hash_value_to_date hash, key
       hash[key] = Date.parse(hash[key]) if hash[key]

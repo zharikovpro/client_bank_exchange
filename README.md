@@ -1,3 +1,5 @@
+[![Code Climate](https://codeclimate.com/repos/56b122ade5537100910004ff/badges/3c0825968e506221b427/gpa.svg)](https://codeclimate.com/repos/56b122ade5537100910004ff/feed)
+
 # Обмен данными в формате 1С
 
 ## Назначение
